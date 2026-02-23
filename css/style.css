@@ -1,0 +1,284 @@
+/* Base Styles & Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a;
+    /* Blue-ish dark background */
+    color: #cbd5e1;
+    /* Soft light gray for readable paragraph text */
+    line-height: 1.6;
+}
+
+/* --- Sticky Navigation --- */
+.top-nav {
+    position: sticky;
+    top: 0;
+    background-color: rgba(15, 23, 42, 0.85);
+    /* Matches background, slightly transparent */
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1e293b;
+    /* Subtle dark border */
+    padding: 1rem;
+    z-index: 100;
+}
+
+.nav-content {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-title {
+    font-family: 'Electrolize', sans-serif;
+    font-weight: 400;
+    color: #f8fafc;
+    /* Bright white/gray */
+    text-decoration: none;
+    font-size: 1.5rem;
+    /* Slightly larger for the nav */
+    letter-spacing: 0.05rem;
+}
+
+.nav-contact {
+    font-size: 0.95rem;
+    color: #38bdf8;
+    /* Bright sky blue */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-contact:hover {
+    color: #7dd3fc;
+    /* Lighter blue on hover */
+    text-decoration: underline;
+}
+
+/* --- Layout & Typography --- */
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1rem 5rem 1rem;
+}
+
+h1,
+h2 {
+    color: #f8fafc;
+    /* Bright white/gray for headings */
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-family: 'Electrolize', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: -0.05rem;
+    font-weight: 400;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-top: 3rem;
+    border-bottom: 1px solid #1e293b;
+    /* Subtle dark border */
+    padding-bottom: 0.5rem;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Post List --- */
+.post-list {
+    list-style: none;
+}
+
+.post-list li {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    /* Muted slate gray */
+    margin-bottom: 0.2rem;
+}
+
+.post-list a {
+    color: #38bdf8;
+    /* Bright sky blue */
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+}
+
+.post-list a:hover {
+    color: #7dd3fc;
+    /* Lighter blue on hover */
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (min-width: 600px) {
+    .post-list li {
+        flex-direction: row;
+        align-items: baseline;
+    }
+
+    .post-date {
+        min-width: 120px;
+        margin-bottom: 0;
+    }
+}
+
+
+/* =========================================
+   BLOG POST SPECIFIC STYLES 
+   ========================================= */
+
+/* Switch the font for the post body to make it unique */
+.post-page {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Post Header */
+.post-header {
+    margin-bottom: 2rem;
+}
+
+.post-header h1 {
+    font-family: 'Electrolize', sans-serif;
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.post-content h2 {
+    font-family: 'Electrolize', sans-serif;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    border-bottom: none;
+    /* Removed the line for a cleaner look inside posts */
+    color: #38bdf8;
+    /* Make post headings blue */
+}
+
+/* Bold and Italic Styling */
+.post-content strong {
+    color: #f8fafc;
+    /* Bright white for bold text to make it stand out */
+    font-weight: 600;
+}
+
+.post-content em {
+    color: #94a3b8;
+    /* Slightly muted for italics */
+    font-style: italic;
+}
+
+/* Images inside posts */
+.post-image {
+    width: 100%;
+    /* Makes image span the full width of the container */
+    height: auto;
+    /* Keeps aspect ratio intact */
+    border-radius: 8px;
+    /* Smooth, rounded corners */
+    border: 1px solid #1e293b;
+    /* Subtle border blending with the background */
+    margin: 2rem 0;
+    /* Space above and below the image */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    /* Soft shadow for depth */
+}
+
+/* Inline code styling (e.g., inside a paragraph) */
+code {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: #1e293b;
+    /* Slightly lighter dark-blue background */
+    color: #7dd3fc;
+    /* Light blue text */
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Code block styling (multiple lines of code) */
+pre {
+    background-color: #1e293b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    /* Adds a scrollbar if the code line is too long */
+    margin: 1.5rem 0;
+    border: 1px solid #334155;
+}
+
+pre code {
+    background-color: transparent;
+    /* Removes the inline code background */
+    color: #e2e8f0;
+    /* Soft white text for big code blocks */
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+/* --- Back to Home Link --- */
+.back-link {
+    display: inline-block;
+    margin-bottom: 2rem;
+    color: #94a3b8;
+    /* Muted slate gray */
+    text-decoration: none;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    /* Keeps it matching the UI elements */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.back-link:hover {
+    color: #38bdf8;
+    /* Bright sky blue on hover */
+    transform: translateX(-4px);
+    /* Gently nudges the arrow to the left on hover */
+}
+
+/* --- Listas dentro de los artículos --- */
+.post-content ul,
+.post-content ol {
+    margin-top: -0.5rem;
+    /* Acerca ligeramente la lista al párrafo anterior */
+    margin-bottom: 1.5rem;
+    /* Mantiene el mismo espaciado inferior que los párrafos */
+    padding-left: 2rem;
+    /* Sangría limpia para que no choque con el borde */
+}
+
+.post-content li {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    margin-bottom: 0.8rem;
+    /* Da un respiro entre cada punto de la lista */
+    line-height: 1.6;
+}
+
+/* El pseudo-elemento ::marker nos permite pintar solo el número o la viñeta */
+.post-content ul li::marker,
+.post-content ol li::marker {
+    color: #38bdf8;
+    /* Nuestro azul brillante (Sky Blue) */
+    font-family: 'JetBrains Mono', monospace;
+    /* Usamos la fuente de código para los números, se ve muy bien */
+    font-weight: bold;
+}

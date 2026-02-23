@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Project: Neural Network - Leonardo's Workspace</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Electrolize&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="post-page">
+    <main class="container">
+
+        <a href="index.html" class="back-link">Volver al inicio</a>
+
+
+        <article class="post-content">
+
+            <header class="post-header">
+                <span class="post-date">Leonardo Quiroga, February 23, 2026</span>
+                <h1>Construyendo un Servidor MCP: versión 0.1</h1>
+            </header>
+
+            <p><strong>Este post fué escrito en su totalidad por un humano sin
+                    intervención de la Inteligencia Artificial.</strong></code> </p>
+
+
+            <img src="images/gandalf_computer.png" alt="Galdalf writing code" class="post-image">
+
+            <p>
+                No me considero la persona más entusiasmada por la IA. La primera vez que la usé fué en Diciembre de
+                2022 a través de <a href="https://copilot.microsoft.com/" class="nav-contact">Copilot</a>. Mi primera
+                expericiencia fué
+                "escribiendo" tests en
+                <a href="https://docs.python.org/3/library/unittest.html" class="nav-contact">unitest</a> y tengo el
+                vívido recuerdo de mirar hacia el monitor y presenciar los primeros autocompletados dados por la
+                herramienta. <br><br>
+
+                En ese entonces no existía nada de lo que existe hoy, ni siquiera el concepto de
+                <code> prompt engineer</code>.
+                Mucho menos el concepto que vengo a exponer hoy, casi 4 años despues de que la IA se vuelva parte de
+                mi vida y de la vida de prácticamente todos los desarrolladores.
+            </p>
+
+            <h2>Servidor MCP</h2>
+            <p>
+                Las siglas MCP significan <strong>Model Context Protocol</strong> y la palabra
+                servidor, bueno, no creo que deba explicarla. Un servidor MCP es un proceso que
+                se dedica a "servir" recursos a traves de un protocolo particular, similar a REST en
+                intención pero no en sintaxis. Mientras que un servidor tradicional REST tiene el objetivo de
+                exponer endpoints tales como <code>GET /customer</code>, un servidor MCP se dedida a
+                exponer 3 tipos de objetos: <strong>Tools, Resources</strong> y <strong>Prompts</strong>.
+            </p>
+
+            <p>
+                Estos servidores tienen, a mi parecer, dos características principales:
+
+            <ol>
+                <li>Utilizan <a href="https://www.jsonrpc.org/" class="nav-contact">JSON-RCP</a>
+                    para comunicarse con el cliente usando <code>stidio</code> o <code>stremeable HTTP</code> como <a
+                        href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
+                        class="nav-contact">
+                        capas de transporte</a> </li>
+                <li>Son amigables con los LLM.</li>
+            </ol>
+            </p>
+
+            <p>
+                Mientras que el punto uno es algo meramente técnico, el segundo es el más interesante
+                y el que me lleva a escribir este post. <br>
+                ¿Qué significa "amigable con un LLM"? ¿Toman mates juntos? ¿Son del mismo equipo de fútbol?
+            </p>
+
+            <p>Resulta ser que los LLM, al momento de ser entrenados, cuentan con el "conocimiento" (datos) que
+                se les fué proporcionado a la fecha. Su "knowledge limit", generalmente de 3 a 6 meses previo a la
+                fecha de su lanzamiento, es todo lo que conocen. En los modelos iniciales, alla por 2022, si preguntabas
+                algo
+                muy actual la IA alucinaba. Este es el primer problema que ataca un servidor MCP, el contexto expuesto
+                hacia el LLM.
+            </p>
+
+            <p>
+                La brecha de conocimiento entre el conjunto de datos usado para entrenar a un LLM y
+                el día de hoy puede ser abismal y, a su vez, los temas/tópicos en los qué fué entrenado pueden
+                variar con nuestras necesidades.
+            </p>
+            <p>
+                <strong>Cuando conectamos un LLM a un servidor MCP le damos al modelo el contexto necesario para que
+                    responda preguntas o accione ante un problema específico
+                    de nuestro entorno. </strong> Para ello, dotamos al LLM de manos (tools),
+                libros (resources) e instrucciones (prompts) para que sea capaz de realizar actividades
+                para las cuales no fué entrenado originalmente. De eso se trata el proyecto de hoy.
+            </p>
+
+
+            <h2>El problema</h2>
+            <p>
+                Como todos, en mi día a día laboral me encuentro con actividades que no son completamente de mi agrado.
+                Actualmente me desempeño como Tech Lead y una de mis tareas implica generar issues en Jira para que
+                el equipo las implemente. Para generar una issue tengo que tener en cuenta varios puntos. El contenido
+                debe:
+            </p>
+
+            <ol>
+                <li>Ser lo suficientemente técnico para que no haya <em>(tanto)</em> lugar a la duda o ambigüedad.</li>
+                <li>Tener en cuenta la interconexión entre sistemas, las capas que lo componen y la interacción entre
+                    las mismas.</li>
+                <li>Contener el suficiente contexto para que el programador no vaya a ciegas programando, sino que
+                    entienda la razón por la que realiza los métodos y el problema que está resolviendo.</li>
+                <li>En raras ocasiones debe contener una sección no técnica para que otros roles aprueben o verifiquen
+                    que la funcionalidad es precisamente lo que se necesita.</li>
+            </ol>
+
+            <p>
+                En resumen, al escribir una issue de <em>buena calidad</em> se debe contar con conocimiento del proyecto
+                y conocimiento técnico. Automatizar (o semi automatizar) esta actividad sería excelente para que me
+                pueda
+                enfocar en otras cosas, agilizando el desarrollo <em>(o terminando desempleado)</em><br>
+            </p>
+
+            <h2>El contexto y sus formatos</h2>
+
+            <p>Para solucionar mi problema necesito dotar al LLM del contexto suficiente para que pueda
+                comprender
+            </p>
+
+            <pre><code>
+@mcp.tool(name="query_repository", 
+          description="Query the chromadb collection")
+def query_repository(query_term: str) -> dict:
+    """Query the chromadb repository collection 
+    with a query term and return the results"""
+    l.info(f"query_repository: Received query: {query_term}")
+    return QueryTool().query(query_term)
+
+
+@mcp.tool(
+    name="get_file_by_full_path",
+    description="Get the content of a file given its full path",
+)
+def get_file_by_full_path(file_path: str) -> str | None:
+    """Gets the content of a file given its full path.
+    Eg. "/home/user/repo/file.py"
+    """
+    l.info(f"get_file_by_full_path: Received file path: {file_path}")
+    return FileTool.get_file_by_name(file_path)
+
+
+@mcp.tool(name="get_folder_tree", 
+          description="Get the folder tree structure starting from a given path")
+def get_folder_tree(folder_path: str) -> dict:
+    """Gets the folder tree structure starting from a given path.
+    Usefull for understanding the structure of a 
+    repository, project module or any folder"""
+    l.info(f"get_folder_tree: Received folder path: {folder_path}")
+    return FileTool.get_folder_tree(folder_path)
+    </code></pre>
+
+            <h2>Key Takeaways</h2>
+            <p>
+                Building this from scratch taught me that while modern frameworks abstract away the complexity,
+                understanding the <em>gradient descent</em> mechanics is crucial for debugging models that refuse to
+                converge.
+            </p>
+
+        </article>
+    </main>
+
+</body>
+
+</html>
