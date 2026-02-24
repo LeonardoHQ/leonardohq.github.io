@@ -28,8 +28,7 @@
                 <h1>Construyendo un Servidor MCP: versión 0.1</h1>
             </header>
 
-            <p><strong>Este post fué escrito en su totalidad por un humano sin
-                    intervención de la Inteligencia Artificial.</strong></code> </p>
+            <p><strong>Este post fué escrito en su totalidad por un humano.</strong></code> </p>
 
 
             <img src="images/gandalf_computer.png" alt="Galdalf writing code" class="post-image">
@@ -53,10 +52,10 @@
             <p>
                 Las siglas MCP significan <strong>Model Context Protocol</strong> y la palabra
                 servidor, bueno, no creo que deba explicarla. Un servidor MCP es un proceso que
-                se dedica a "servir" recursos a traves de un protocolo particular, similar a REST en
-                intención pero no en sintaxis. Mientras que un servidor tradicional REST tiene el objetivo de
-                exponer endpoints tales como <code>GET /customer</code>, un servidor MCP se dedida a
-                exponer 3 tipos de objetos: <strong>Tools, Resources</strong> y <strong>Prompts</strong>.
+                se dedica a "servir" recursos a traves de un protocolo particular, similar a un servidor REST en
+                intención pero no en sintaxis. Mientras que un servidor tradicional REST expone
+                endpoints tales como <code>GET /customer</code>, un servidor MCP expone
+                3 tipos de objetos: <strong>Tools, Resources</strong> y <strong>Prompts</strong>.
             </p>
 
             <p>
@@ -73,24 +72,17 @@
             </p>
 
             <p>
-                Mientras que el punto uno es algo meramente técnico, el segundo es el más interesante
-                y el que me lleva a escribir este post. <br>
+                Mientras que el punto uno es algo meramente técnico, el segundo es el más interesante:
                 ¿Qué significa "amigable con un LLM"? ¿Toman mates juntos? ¿Son del mismo equipo de fútbol?
             </p>
 
-            <p>Resulta ser que los LLM, al momento de ser entrenados, cuentan con el "conocimiento" (datos) que
-                se les fué proporcionado a la fecha. Su "knowledge limit", generalmente de 3 a 6 meses previo a la
-                fecha de su lanzamiento, es todo lo que conocen. En los modelos iniciales, alla por 2022, si preguntabas
-                algo
-                muy actual la IA alucinaba. Este es el primer problema que ataca un servidor MCP, el contexto expuesto
-                hacia el LLM.
+            <p> Los LLM, al momento de ser entrenados, cuentan con el "conocimiento" (datos) que
+                se le fué proporcionado a la fecha. Su "knowledge limit", generalmente de 3 a 6 meses previo a la
+                fecha de su lanzamiento es todo lo que conocen. En los modelos iniciales, alla por 2022, ante
+                cualquier pregunta de actualidad, la IA alucinaba y este es uno de los puntos principales de "amistad"
+                entre los MCP y los LLM.
             </p>
 
-            <p>
-                La brecha de conocimiento entre el conjunto de datos usado para entrenar a un LLM y
-                el día de hoy puede ser abismal y, a su vez, los temas/tópicos en los qué fué entrenado pueden
-                variar con nuestras necesidades.
-            </p>
             <p>
                 <strong>Cuando conectamos un LLM a un servidor MCP le damos al modelo el contexto necesario para que
                     responda preguntas o accione ante un problema específico
@@ -119,56 +111,111 @@
             </ol>
 
             <p>
-                En resumen, al escribir una issue de <em>buena calidad</em> se debe contar con conocimiento del proyecto
-                y conocimiento técnico. Automatizar (o semi automatizar) esta actividad sería excelente para que me
-                pueda
-                enfocar en otras cosas, agilizando el desarrollo <em>(o terminando desempleado)</em><br>
+                En resumen, quiero automatizar (o semi automatizar) la generación de issues de <em>buena calidad</em>
+                haciendo
+                uso de IA. Esta actividad sería excelente para que me pueda enfocar en otras
+                cosas, agilizando el desarrollo <em>(o terminando desempleado)</em><br>
             </p>
 
             <h2>El contexto y sus formatos</h2>
 
-            <p>Para solucionar mi problema necesito dotar al LLM del contexto suficiente para que pueda
-                comprender
+            <p>El contexto de este problema abarca varios repositorios de código. Todos entre 40 y 50 mil LOC.
+                En esta versión inicial estoy interesado en abarcar únicamente un repositorio.</p>
+
+            <p>Para que el LLM sea capaz de entender el repositorio existen varias alternativas para almacenar la
+                información</p>
+            <ul>
+                <li>Almacenamiento semántico basado en vectores</li>
+                <li>Almacenamiento de grafos</li>
+                <li>Almacenamiento híbrido de grafos y vectores</li>
+                <li>Almacenamiento en base a... nada. Simplemente guardar el texto</li>
+            </ul>
+
+            <p>Por más que la última opción sea la más tentadora debido a la costumbre de simplemente generar
+                prompts en herramientas como ChatGPT y Gemini, en realidad, es la alternativa menos eficiente.
+                Los LLM tienen una ventana de contexto que es la cantidad de información medida en tokens que pueden
+                procesar en una sola interacción.
+            </p>
+            <p>Si proporcionamos 40 mil LOC, la cantidad de tokens generados superará la ventana de contexto
+                de la mayoría de LLMs dandonos como resultado las alucinaciones que queremos evitar. Por esa razón, la
+                alternativa que decidí utilizar en este proyecto es el almacenamiento semántico basado en vectores.
             </p>
 
+            <h3>Semántica y tree-sitter </h3>
+            <p>Primero... ¿qué es el almacenamiento semántico? <br>
+                Básicamente es el almacenamiento de información en base al <strong>significado</strong> en vez
+                de únicamente al contenido. Vamos a un ejemplo
+            </p>
             <pre><code>
-@mcp.tool(name="query_repository", 
-          description="Query the chromadb collection")
-def query_repository(query_term: str) -> dict:
-    """Query the chromadb repository collection 
-    with a query term and return the results"""
-    l.info(f"query_repository: Received query: {query_term}")
-    return QueryTool().query(query_term)
+class QueryTool:
+    chroma_connection: ClientAPI = None
 
+    def __init__(self) -> None:
+        self.chroma_connection = ChromaSingleton()
 
-@mcp.tool(
-    name="get_file_by_full_path",
-    description="Get the content of a file given its full path",
-)
-def get_file_by_full_path(file_path: str) -> str | None:
-    """Gets the content of a file given its full path.
-    Eg. "/home/user/repo/file.py"
-    """
-    l.info(f"get_file_by_full_path: Received file path: {file_path}")
-    return FileTool.get_file_by_name(file_path)
+    def query(self, query_term: str) -> QueryResult:
+        """Queries the chroma collection with a query term and returns the results"""
+        result = self.chroma_connection.get_or_create_collection("db").query(
+            query_texts=[query_term],
+            n_results=3,
+            include=["documents", "metadatas", "distances", "embeddings"],
+        )
+        l.info(f"Query results for query term '{query_term}': {result}")
+        return result
+            </code></pre>
 
-
-@mcp.tool(name="get_folder_tree", 
-          description="Get the folder tree structure starting from a given path")
-def get_folder_tree(folder_path: str) -> dict:
-    """Gets the folder tree structure starting from a given path.
-    Usefull for understanding the structure of a 
-    repository, project module or any folder"""
-    l.info(f"get_folder_tree: Received folder path: {folder_path}")
-    return FileTool.get_folder_tree(folder_path)
-    </code></pre>
-
-            <h2>Key Takeaways</h2>
-            <p>
-                Building this from scratch taught me that while modern frameworks abstract away the complexity,
-                understanding the <em>gradient descent</em> mechanics is crucial for debugging models that refuse to
-                converge.
+            <p>En el fragmento de código proporcinado vemos un montón de texto. Si alcenáramos la información tal cual
+                fué
+                presentada, un LLM tendría muchos tokens que procesar. Sería ideal entender qué representa cada segmento
+                del "texto". Observandolo nuevamente distinguimos una clase principal <code>QueryTool</code>,
+                dos métodos <code>__init__</code> y <code>query</code>, y un atributo de clase
+                <code>chroma_connection</code>.
+                Estas distinciones implican el análisis semántico <em>(muy simplificado)</em> de una pieza de código.
             </p>
+            <p>Por suerte para realizar este tipo de análsis ya existen herramientas especializadas.
+                Entre ellas
+                una que destaca por su continuo uso en Github es <a href="https://tree-sitter.github.io/tree-sitter/"
+                    class="nav-contact">tree-sitter</a>, un parseador de código incremental con el objetivo de
+                "entender"
+                cualquier lenguaje de programación. Generalmente usado para hacer syntax highlighting, posee muchos
+                usos.
+                En nuestro caso, nos interesa que sea capaz de ditinguir métodos y clases en Python.
+            </p>
+            <p>Tree-sitter es capaz de entender que <code>def query(self, query_term: str) -> QueryResult:</code> es
+                un método, en qué línea de código inicia, en cual termina, a qué clase pertenece, cuales son sus
+                argumentos,
+                qué documentación posee el método, etc, etc, etc. Es la herramienta ideal para dividir un gran
+                repositorio en <strong>chunks semánticos</strong>.</p>
+
+            <h3>Vectorización</h3>
+            <p>Recordando que estamos usando un <em>Almacenamiento semántico basado en vectores</em> ya tenemos mas o
+                menos entendida la parte <em>semántica</em>. Ahora falta entender la parte de vectores. No voy a ahondar
+                en
+                explicaciones matemáticas de vectores principalmente porque no estoy capacitado para hacerlo. Pero
+                tambien
+                porque hacen perder el foco del post. Definamos un vector como un listado de números:
+                <code>[0.1, 0.52, -0.35, 0.93]</code>. Cuando decimos que representamos datos como vectores lo que
+                sucede es que, a partir del uso de una herramienta como
+                <a href="https://docs.trychroma.com/docs/overview/getting-started" , class="nav-contact">chromadb</a>,
+                tomamos
+                como input el texto y como output se nos da vectores, simple.
+            </p>
+            <p>Luego, cuando queremos realizar una búsqueda tal como "connection to chroma", los términos tambien son
+                transformados a vectores haciendo que la búsqueda sea algo como "qué tanto se parecen estos vectores a
+                los
+                vectores que tengo almacenados" y, de acuerdo a la similitud, un resultado se nos es proporcionado.
+            </p>
+            <h3>Chunks</h3>
+            <p>Fusionando la separación semántica del código y luego convirtiendo los resultados en vectores nos da un
+                excelente punto de partida para seccionar nuestra información en chunks. Los chunks son las piezas de un
+                todo.
+                En este proyecto almacené un registro vectorizado por cáda método de cada clase y un registro por cada
+                definición
+                de clase.
+            </p>
+            <img src="images/chunk_image.png" alt="Chunks" class="post-image">
+
+
 
         </article>
     </main>
